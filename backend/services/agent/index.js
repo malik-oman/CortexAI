@@ -1,7 +1,7 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import 'dotenv/config'
 import express from 'express'
 import { connectDb } from './config/db.js'
+import agentRouter from './routes/agent.route.js'
 
 
 
@@ -12,7 +12,7 @@ app.use(express.json())
 const port = process.env.PORT
 
 // ===========================================================================
-
+app.use("/", agentRouter)
 
 // ==========================================================================
 app.listen(port,()=>{
