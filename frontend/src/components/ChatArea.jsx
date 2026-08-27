@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Nav from './Nav'
 import MessageList from './MessageList'
 import ChatInput from './ChatInput'
@@ -7,24 +7,31 @@ import getMessages from '../features/getMessages'
 import { setMessages } from '../redux/messageSlice'
 
 const ChatArea = () => {
+  const { selectedConversation } = useSelector(state => state.conversation)
+  const dispatch = useDispatch()
+  const [isFetching, setIsFetching] = useState(false)
+  const [isLoading, setIsLoading] = useState(false) // AI response ka wait
 
-const {selectedConversation} = useSelector(state=>state.conversation)
-const dispatch = useDispatch()
-useEffect(()=>{
-  const getMesg = async () => {
-    if (selectedConversation) {
-      const data =  await getMessages(selectedConversation?._id)
-      dispatch(setMessages(data))
+  useEffect(() => {
+    const getMesg = async () => {
+      if (selectedConversation) {
+        setIsFetching(true)
+        try {
+          const data = await getMessages(selectedConversation?._id)
+          dispatch(setMessages(data))
+        } finally {
+          setIsFetching(false)
+        }
+      }
     }
     getMesg()
-  }
-},[selectedConversation])
+  }, [selectedConversation])
 
   return (
-    <div className='flex-1 flex flex-col '>
-      <Nav/>
-      <MessageList/>
-      <ChatInput/>
+    <div className='flex-1 flex flex-col h-screen min-w-0'>
+      <Nav />
+      <MessageList isFetching={isFetching} isLoading={isLoading} />
+      <ChatInput isLoading={isLoading} setIsLoading={setIsLoading} />
     </div>
   )
 }
