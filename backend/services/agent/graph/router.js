@@ -1,6 +1,15 @@
 import { getModel } from "../config/llmModel.js";
 
 export const router = async (state) => {
+
+
+  if (state.agent && state.agent !== "auto") {
+  return {
+  ...state,
+  agent:state.agent
+}
+  }
+
   const llm = await getModel("router");
   const prompt = `You are a routing agent. Your ONLY job is to analyze the user's latest message and conversation context, then decide which specialized agent should handle it next.
 

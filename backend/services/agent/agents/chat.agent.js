@@ -1,8 +1,16 @@
-import { getModel } from "../config/llmModel.js"
-
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from "@langchain/core/messages";
+import { getModel } from "../config/llmModel.js";
+import { getMemory } from "../config/memory.js";
 
 export const chatAgent = async (state) => {
-  const llm = await getModel("chat")
+  const llm = await getModel("chat");
+
+  const history = (await getMemory(state.conversationId)) || [];
+
   const systemPrompt = `You are CortexAI, an intelligent AI assistant.
 
 Follow these formatting rules in every response:
@@ -20,19 +28,24 @@ Follow these formatting rules in every response:
 
 Always prioritize clarity, readability, and structure in your responses.`;
 
-const response =   await llm.invoke([
-  {
-    "role":"system",
-    "content":systemPrompt
-  },
-  {
-    "role":"human",
-    "content":state.prompt
-  }
-])
+  const messages = [new SystemMessage(systemPrompt)];
+  history.forEach((msg) => {
+    if (msg.role == "user") {
+      messages.push(new HumanMessage(msg.content));
+    } 
+    if(msg.role == "assistant") {
+      messages.push(new AIMessage(msg.content));
+    }
+  });
 
-return {
-  ...state,
-  aiResponse:response.content
-}
-}
+  messages.push(new HumanMessage(state.prompt))
+
+
+
+  const response = await llm.invoke(messages);
+
+  return {
+    ...state,
+    aiResponse: response.content,
+  };
+};

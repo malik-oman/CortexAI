@@ -15,6 +15,7 @@ const ChatArea = () => {
   useEffect(() => {
     const getMesg = async () => {
       if (selectedConversation) {
+        if(selectedConversation.title=="New Chat") return
         setIsFetching(true)
         try {
           const data = await getMessages(selectedConversation?._id)
@@ -25,7 +26,7 @@ const ChatArea = () => {
       }
     }
     getMesg()
-  }, [selectedConversation])
+  }, [selectedConversation?._id])
 
   return (
     <div className='flex-1 flex flex-col h-screen min-w-0'>
